@@ -84,3 +84,11 @@ func GetFocEngineEventsCollection() *mongo.Collection {
 	}
 	return collection
 }
+
+func GetDeviceChallengesCollection() *mongo.Collection {
+	collection := Mongo.Client.Database("foc_engine").Collection("device_challenges")
+	if collection == nil {
+		fmt.Println("Collection not found: foc_engine device_challenges")
+	}
+	return collection
+}

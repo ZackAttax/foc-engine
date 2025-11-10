@@ -117,7 +117,7 @@ func GetStarknetClassAt(address string) (*ContractClass, error) {
 	}
 
 	// Send the request to the Starknet RPC endpoint
-	url := "http://" + config.Conf.Rpc.Host
+	url := "https://" + config.Conf.Rpc.Host
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err

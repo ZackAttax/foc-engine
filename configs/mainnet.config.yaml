@@ -1,5 +1,5 @@
 Rpc:
-  Host: starknet-mainnet.public.blastapi.io/rpc/v0_7
+  Host: starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/24GEjGFAPv26w3NmSfZHQ
 Api:
   Host: api
   Port: 8080

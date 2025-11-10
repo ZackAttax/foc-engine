@@ -68,7 +68,7 @@ onchain:
 standaloneIndexer:
   contractAddress: "0x005401469540cd2bc67bf470d9c775bf53095669660a7f151f09bf7d458f936d"
   eventName: "BalanceUpdated"
-  rpcUrl: "wss://starknet-sepolia.blastapi.io/b6d0b8b2-2d15-4d8b-b6f4-9de752e7d85f"
+  rpcUrl: "wss://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/24GEjGFAPv26w3NmSfZHQ"
   startBlock: "1779600"
   orderBy: "3"
   unique: "1"

@@ -1,5 +1,5 @@
 Rpc:
-  Host: starknet-sepolia.public.blastapi.io/rpc/v0_7
+  Host: starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/24GEjGFAPv26w3NmSfZHQ
 Api:
   Host: api
   Port: 8080

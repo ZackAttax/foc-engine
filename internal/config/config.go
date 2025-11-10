@@ -136,3 +136,33 @@ func GetPaymasterApiKey() string {
     return ""
   }
 }
+
+// GetGooglePlayIntegrityProjectNumber returns the Google Play Integrity project number
+func GetGooglePlayIntegrityProjectNumber() string {
+	return getEnvOrDefault("GOOGLE_PLAY_INTEGRITY_PROJECT_NUMBER", "")
+}
+
+// GetGooglePlayIntegrityPackageName returns the Google Play Integrity package name
+func GetGooglePlayIntegrityPackageName() string {
+	return getEnvOrDefault("GOOGLE_PLAY_INTEGRITY_PACKAGE_NAME", "")
+}
+
+// GetGoogleCloudServiceAccountJSON returns the Google Cloud service account JSON (file path or JSON string)
+func GetGoogleCloudServiceAccountJSON() string {
+	return getEnvOrDefault("GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON", "")
+}
+
+// GetAppleTeamID returns the Apple Team ID for DeviceCheck
+func GetAppleTeamID() string {
+	return getEnvOrDefault("APPLE_TEAM_ID", "")
+}
+
+// GetAppleKeyID returns the Apple Key ID for DeviceCheck
+func GetAppleKeyID() string {
+	return getEnvOrDefault("APPLE_KEY_ID", "")
+}
+
+// GetApplePrivateKeyPath returns the path to the Apple private key file for DeviceCheck
+func GetApplePrivateKeyPath() string {
+	return getEnvOrDefault("APPLE_PRIVATE_KEY_PATH", "")
+}

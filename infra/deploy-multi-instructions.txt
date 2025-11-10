@@ -223,7 +223,7 @@ kubectl top pods -n foc-engine-mainnet
 ### Environment Variables Summary
 ----------------------------------
 Required for deployments:
-- AVNU_API_KEY: Different keys for Sepolia and Mainnet
+- AVNU_API_KEY: Same key for Sepolia and Mainnet
 - STANDALONE_INDEXER_RPC_URL: RPC endpoints for each network
 - STARKNET_KEYSTORE: Path to keystore file (network-specific)
 - STARKNET_ACCOUNT: Path to account file (network-specific)
