@@ -7,6 +7,7 @@ import (
 
 	"github.com/b-j-roberts/foc-engine/internal/config"
 	"github.com/b-j-roberts/foc-engine/internal/db/mongo"
+	"github.com/b-j-roberts/foc-engine/internal/deviceverification"
 	"github.com/b-j-roberts/foc-engine/routes"
 )
 
@@ -15,6 +16,12 @@ func main() {
 
 	if mongo.ShouldConnectMongo() {
 		mongo.InitMongoDB()
+	}
+
+	// Initialize device verification service
+	if err := deviceverification.InitDeviceVerification(); err != nil {
+		fmt.Printf("Warning: Failed to initialize device verification: %v\n", err)
+		fmt.Println("Device verification endpoints will not be available")
 	}
 
 	routes.StartServer(config.Conf.Api.Host, config.Conf.Api.Port)

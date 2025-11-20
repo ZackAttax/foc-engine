@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -34,6 +35,8 @@ type VerifyAndroidResponse struct {
 func VerifyAndroid(w http.ResponseWriter, r *http.Request) {
 	routeutils.SetupHeaders(w)
 
+	fmt.Printf("[DeviceVerification] Android verification request received from %s\n", r.RemoteAddr)
+
 	if r.Method != http.MethodPost {
 		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
@@ -41,25 +44,35 @@ func VerifyAndroid(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, err := routeutils.ReadJsonBody[VerifyAndroidRequest](r)
 	if err != nil {
+		fmt.Printf("[DeviceVerification] Android verification error: Invalid JSON body - %v\n", err)
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON body")
 		return
 	}
 
 	if reqBody.IntegrityToken == "" {
+		fmt.Printf("[DeviceVerification] Android verification error: Missing integrityToken\n")
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing 'integrityToken' field")
 		return
 	}
 
 	if reqBody.AccountAddress == "" {
+		fmt.Printf("[DeviceVerification] Android verification error: Missing accountAddress\n")
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing 'accountAddress' field")
 		return
 	}
 
+	fmt.Printf("[DeviceVerification] Calling Google Play Integrity API for account: %s (token length: %d)\n",
+		reqBody.AccountAddress, len(reqBody.IntegrityToken))
+
 	result, err := deviceverification.VerifyAndroidIntegrityToken(reqBody.IntegrityToken, "")
 	if err != nil {
+		fmt.Printf("[DeviceVerification] Android verification API error: %v\n", err)
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	fmt.Printf("[DeviceVerification] Android verification result - Verified: %v, Error: %s, DeviceRecall: %+v\n",
+		result.Verified, result.Error, result.DeviceRecall)
 
 	response := VerifyAndroidResponse{
 		DeviceRecall: result.DeviceRecall,
@@ -177,6 +190,8 @@ type VerifyIOSResponse struct {
 func VerifyIOS(w http.ResponseWriter, r *http.Request) {
 	routeutils.SetupHeaders(w)
 
+	fmt.Printf("[DeviceVerification] iOS verification request received from %s\n", r.RemoteAddr)
+
 	if r.Method != http.MethodPost {
 		routeutils.WriteErrorJson(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
@@ -184,24 +199,31 @@ func VerifyIOS(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, err := routeutils.ReadJsonBody[VerifyIOSRequest](r)
 	if err != nil {
+		fmt.Printf("[DeviceVerification] iOS verification error: Invalid JSON body - %v\n", err)
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Invalid JSON body")
 		return
 	}
 
 	if reqBody.AttestationObject == "" {
+		fmt.Printf("[DeviceVerification] iOS verification error: Missing attestationObject\n")
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing 'attestationObject' field")
 		return
 	}
 
 	if reqBody.Challenge == "" {
+		fmt.Printf("[DeviceVerification] iOS verification error: Missing challenge\n")
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing 'challenge' field")
 		return
 	}
 
 	if reqBody.AccountAddress == "" {
+		fmt.Printf("[DeviceVerification] iOS verification error: Missing accountAddress\n")
 		routeutils.WriteErrorJson(w, http.StatusBadRequest, "Missing 'accountAddress' field")
 		return
 	}
+
+	fmt.Printf("[DeviceVerification] Calling Apple DeviceCheck API for account: %s (attestation length: %d, keyId: %s)\n",
+		reqBody.AccountAddress, len(reqBody.AttestationObject), reqBody.KeyId)
 
 	result, err := deviceverification.VerifyIOSAttestation(
 		reqBody.AttestationObject,
@@ -210,9 +232,13 @@ func VerifyIOS(w http.ResponseWriter, r *http.Request) {
 		reqBody.AccountAddress,
 	)
 	if err != nil {
+		fmt.Printf("[DeviceVerification] iOS verification API error: %v\n", err)
 		routeutils.WriteErrorJson(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	fmt.Printf("[DeviceVerification] iOS verification result - Verified: %v, HasClaimedReward: %v, Error: %s\n",
+		result.Verified, result.HasClaimedReward, result.Error)
 
 	response := VerifyIOSResponse{
 		HasClaimedReward: result.HasClaimedReward,

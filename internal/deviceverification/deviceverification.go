@@ -79,6 +79,21 @@ func InitDeviceVerification() error {
 	Service = service
 	service.Initialized = true
 
+	// Log initialization status
+	if service.GoogleProjectNumber != "" {
+		fmt.Printf("[DeviceVerification] Google Play Integrity initialized - Project: %s, Package: %s\n",
+			service.GoogleProjectNumber, service.GooglePackageName)
+	} else {
+		fmt.Printf("[DeviceVerification] Google Play Integrity not configured\n")
+	}
+
+	if service.AppleTeamID != "" {
+		fmt.Printf("[DeviceVerification] Apple DeviceCheck initialized - TeamID: %s, KeyID: %s\n",
+			service.AppleTeamID, service.AppleKeyID)
+	} else {
+		fmt.Printf("[DeviceVerification] Apple DeviceCheck not configured\n")
+	}
+
 	return nil
 }
 

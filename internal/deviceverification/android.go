@@ -88,8 +88,12 @@ func VerifyAndroidIntegrityToken(token, packageName string) (*VerifyAndroidRespo
 		Timeout: 30 * time.Second,
 	}
 
+	fmt.Printf("[AndroidIntegrity] Making API call to: %s\n", url)
+	fmt.Printf("[AndroidIntegrity] OAuth token obtained (length: %d)\n", len(oauthToken.AccessToken))
+
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonBody))
 	if err != nil {
+		fmt.Printf("[AndroidIntegrity] Failed to create request: %v\n", err)
 		return &VerifyAndroidResponse{
 			Verified: false,
 			Error:    fmt.Sprintf("failed to create request: %v", err),
@@ -101,12 +105,15 @@ func VerifyAndroidIntegrityToken(token, packageName string) (*VerifyAndroidRespo
 
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Printf("[AndroidIntegrity] API call failed: %v\n", err)
 		return &VerifyAndroidResponse{
 			Verified: false,
 			Error:    fmt.Sprintf("failed to call Google API: %v", err),
 		}, nil
 	}
 	defer resp.Body.Close()
+
+	fmt.Printf("[AndroidIntegrity] API response status: %d\n", resp.StatusCode)
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -117,15 +124,19 @@ func VerifyAndroidIntegrityToken(token, packageName string) (*VerifyAndroidRespo
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("[AndroidIntegrity] API returned error status %d: %s\n", resp.StatusCode, string(body))
 		return &VerifyAndroidResponse{
 			Verified: false,
 			Error:    fmt.Sprintf("Google API returned status %d: %s", resp.StatusCode, string(body)),
 		}, nil
 	}
 
+	fmt.Printf("[AndroidIntegrity] API call successful, parsing response (body length: %d)\n", len(body))
+
 	// Parse response
 	var integrityResp AndroidIntegrityResponse
 	if err := json.Unmarshal(body, &integrityResp); err != nil {
+		fmt.Printf("[AndroidIntegrity] Failed to parse response: %v\n", err)
 		return &VerifyAndroidResponse{
 			Verified: false,
 			Error:    fmt.Sprintf("failed to parse response: %v", err),
@@ -133,6 +144,7 @@ func VerifyAndroidIntegrityToken(token, packageName string) (*VerifyAndroidRespo
 	}
 
 	if integrityResp.TokenPayloadExternal == nil {
+		fmt.Printf("[AndroidIntegrity] Invalid token payload in response\n")
 		return &VerifyAndroidResponse{
 			Verified: false,
 			Error:    "invalid token payload",
@@ -149,6 +161,9 @@ func VerifyAndroidIntegrityToken(token, packageName string) (*VerifyAndroidRespo
 	if integrityResp.TokenPayloadExternal.DeviceRecall != nil {
 		deviceRecall = integrityResp.TokenPayloadExternal.DeviceRecall
 	}
+
+	fmt.Printf("[AndroidIntegrity] Verification successful - DeviceRecall: BitFirst=%v, BitSecond=%v, BitThird=%v\n",
+		deviceRecall.BitFirst, deviceRecall.BitSecond, deviceRecall.BitThird)
 
 	return &VerifyAndroidResponse{
 		DeviceRecall: deviceRecall,
@@ -196,8 +211,11 @@ func MarkAndroidDeviceClaimed(token string) error {
 		Timeout: 30 * time.Second,
 	}
 
+	fmt.Printf("[AndroidIntegrity] Marking device as claimed - API call to: %s\n", url)
+
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonBody))
 	if err != nil {
+		fmt.Printf("[AndroidIntegrity] Failed to create mark-claimed request: %v\n", err)
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
@@ -206,14 +224,19 @@ func MarkAndroidDeviceClaimed(token string) error {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Printf("[AndroidIntegrity] Mark-claimed API call failed: %v\n", err)
 		return fmt.Errorf("failed to call Google API: %w", err)
 	}
 	defer resp.Body.Close()
 
+	fmt.Printf("[AndroidIntegrity] Mark-claimed API response status: %d\n", resp.StatusCode)
+
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
+		fmt.Printf("[AndroidIntegrity] Mark-claimed API returned error: %s\n", string(body))
 		return fmt.Errorf("Google API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
+	fmt.Printf("[AndroidIntegrity] Device successfully marked as claimed\n")
 	return nil
 }

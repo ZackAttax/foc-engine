@@ -29,6 +29,8 @@ func InitRoutes() {
 	if config.ModuleEnabled(config.ModulePaymaster) {
 		InitPaymasterRoutes()
 	}
+	// Device verification routes are always available if service is initialized
+	InitDeviceVerificationRoutes()
 }
 
 func StartServer(host string, port int) {

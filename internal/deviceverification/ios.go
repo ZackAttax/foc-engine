@@ -183,9 +183,13 @@ func CheckDeviceCheckBits(deviceToken string) (bool, error) {
 		Timeout: 30 * time.Second,
 	}
 
+	fmt.Printf("[IOSDeviceCheck] Querying device bits - API call to: %s\n", url)
+	fmt.Printf("[IOSDeviceCheck] JWT token generated (length: %d)\n", len(jwtToken))
+
 	ctx := context.Background()
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonBody))
 	if err != nil {
+		fmt.Printf("[IOSDeviceCheck] Failed to create request: %v\n", err)
 		return false, fmt.Errorf("failed to create request: %w", err)
 	}
 
@@ -194,16 +198,21 @@ func CheckDeviceCheckBits(deviceToken string) (bool, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Printf("[IOSDeviceCheck] API call failed: %v\n", err)
 		return false, fmt.Errorf("failed to call DeviceCheck API: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Printf("[IOSDeviceCheck] Failed to read response: %v\n", err)
 		return false, fmt.Errorf("failed to read response: %w", err)
 	}
 
+	fmt.Printf("[IOSDeviceCheck] API response status: %d (body length: %d)\n", resp.StatusCode, len(body))
+
 	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("[IOSDeviceCheck] API returned error status %d: %s\n", resp.StatusCode, string(body))
 		return false, fmt.Errorf("DeviceCheck API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
@@ -215,11 +224,17 @@ func CheckDeviceCheckBits(deviceToken string) (bool, error) {
 	}
 
 	if err := json.Unmarshal(body, &deviceCheckResp); err != nil {
+		fmt.Printf("[IOSDeviceCheck] Failed to parse response: %v\n", err)
 		return false, fmt.Errorf("failed to parse response: %w", err)
 	}
 
+	fmt.Printf("[IOSDeviceCheck] Device bits - Bit0: %d, Bit1: %d, LastUpdateTime: %s\n",
+		deviceCheckResp.Bit0, deviceCheckResp.Bit1, deviceCheckResp.LastUpdateTime)
+
 	// bit0 represents if device has claimed reward
-	return deviceCheckResp.Bit0 == 1, nil
+	hasClaimed := deviceCheckResp.Bit0 == 1
+	fmt.Printf("[IOSDeviceCheck] Device has claimed reward: %v\n", hasClaimed)
+	return hasClaimed, nil
 }
 
 // MarkIOSDeviceClaimed marks an iOS device as claimed using DeviceCheck API
@@ -264,9 +279,12 @@ func MarkIOSDeviceClaimed(deviceToken string) error {
 		Timeout: 30 * time.Second,
 	}
 
+	fmt.Printf("[IOSDeviceCheck] Marking device as claimed - API call to: %s\n", url)
+
 	ctx := context.Background()
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonBody))
 	if err != nil {
+		fmt.Printf("[IOSDeviceCheck] Failed to create mark-claimed request: %v\n", err)
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
@@ -275,15 +293,20 @@ func MarkIOSDeviceClaimed(deviceToken string) error {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Printf("[IOSDeviceCheck] Mark-claimed API call failed: %v\n", err)
 		return fmt.Errorf("failed to call DeviceCheck API: %w", err)
 	}
 	defer resp.Body.Close()
 
+	fmt.Printf("[IOSDeviceCheck] Mark-claimed API response status: %d\n", resp.StatusCode)
+
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
+		fmt.Printf("[IOSDeviceCheck] Mark-claimed API returned error: %s\n", string(body))
 		return fmt.Errorf("DeviceCheck API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
+	fmt.Printf("[IOSDeviceCheck] Device successfully marked as claimed\n")
 	return nil
 }
 

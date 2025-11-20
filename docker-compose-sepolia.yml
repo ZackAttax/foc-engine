@@ -33,7 +33,7 @@ services:
       - CONFIG_PATH=/configs/config.yaml
       - MONGO_URI=mongodb://mongo:27017
       - AVNU_PAYMASTER_API_KEY=${AVNU_PAYMASTER_API_KEY}
-      - ALCHEMY_API_KEY=${ALCHEMY_API_KEY}
+      - ALCHEMY_API_KEY=24GEjGFAPv26w3NmSfZHQ
       - PAYMASTER_NETWORK=${PAYMASTER_NETWORK:-sepolia}
       - PAYMASTER_API_URL=${PAYMASTER_API_URL:-}
     volumes:
@@ -53,7 +53,7 @@ services:
     environment:
       - CONFIG_PATH=/configs/config.yaml
       - MONGO_URI=mongodb://mongo:27017
-      - ALCHEMY_API_KEY=${ALCHEMY_API_KEY}
+      - ALCHEMY_API_KEY=24GEjGFAPv26w3NmSfZHQ
       - NO_PROXY=true
     volumes:
       - ./abis:/app/abis
